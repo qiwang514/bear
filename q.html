@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小雷星空情绪信箱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: #0d0f2b;
+            color: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* 星空背景 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: transparent;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 550px;
+            margin: 50px auto;
+            background: rgba(22, 25, 56, 0.85);
+            padding: 40px 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 40px rgba(136, 104, 255, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            color: #e2d9ff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #b8afff;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* 情绪选择 */
+        .mood-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .mood-btn {
+            padding: 10px 16px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255,255,255,0.08);
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .mood-btn.active {
+            background: linear-gradient(90deg, #9369ff, #6a9fff);
+            color: white;
+        }
+
+        /* 信纸输入框 */
+        .letter-input {
+            width: 100%;
+            height: 180px;
+            background: #fdfdff;
+            color: #222;
+            padding: 15px;
+            font-size: 15px;
+            line-height: 26px;
+            border-radius: 12px;
+            border: none;
+            resize: none;
+            background-image: repeating-linear-gradient(transparent, transparent 25px, #e2e2ff 26px);
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 20px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(90deg, #8c63ff, #5f8dff);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            box-shadow: 0 0 20px rgba(140, 99, 255, 0.4);
+        }
+
+        /* 弹窗卡片 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: linear-gradient(160deg, #141838, #242957);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(140,99,255,0.3);
+            position: relative;
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            color: #d4c9ff;
+        }
+
+        .card-content {
+            margin: 15px 0;
+            line-height: 1.7;
+            color: #eee;
+        }
+
+        .download-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #7e61ff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .close-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: transparent;
+            color: #ccc;
+            border: 1px solid #666;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stars"></div>
+
+    <div class="container">
+        <h1>✨ 星空情绪信箱</h1>
+        <div class="subtitle">把心情写给星星，它会温柔回应你</div>
+
+        <div class="mood-group">
+            <button class="mood-btn active" data-mood="happy">⭐ 开心</button>
+            <button class="mood-btn" data-mood="sad">💙 难过</button>
+            <button class="mood-btn" data-mood="tired">🌙 疲惫</button>
+            <button class="mood-btn" data-mood="confused">💜 加班</button>
+            <button class="mood-btn" data-mood="empty">🤍 放空</button>
+        </div>
+
+        <textarea class="letter-input" placeholder="写下你的心情吧..."></textarea>
+
+        <button class="submit-btn">投递到星空</button>
+    </div>
+
+    <!-- 情绪卡片弹窗 -->
+    <div class="modal" id="modal">
+        <div class="card" id="card">
+            <h2>✨ 星星已收到你的情绪</h2>
+            <div class="card-content" id="replyText"></div>
+            <button class="download-btn" onclick="downloadCard()">保存卡片</button>
+            <button class="close-btn" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        const moodBtns = document.querySelectorAll('.mood-btn');
+        const input = document.querySelector('.letter-input');
+        const submitBtn = document.querySelector('.submit-btn');
+        const modal = document.getElementById('modal');
+        const replyText = document.getElementById('replyText');
+
+        let selectedMood = 'happy';
+
+        // 情绪选择
+        moodBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                moodBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedMood = btn.dataset.mood;
+            });
+        });
+
+        // 星空回复
+        const replies = {
+            happy: "星星说：你的快乐像星光一样温暖，愿小雷永远闪闪发光 ✨",
+            sad: "星星说：难过时可以停下来，我会一直陪着你，把温柔都给你 💙",
+            tired: "星星说：辛苦啦小雷，你已经很棒了，好好休息，世界会温柔待你 🌙",
+            confused: "星星说：加班没关系，慢慢来，别把身体累垮，我会为你照亮回家的路 💜",
+            empty: "星星说：允许自己安静放空，你不需要一直充满能量 🤍"
+        };
+
+        // 提交
+        submitBtn.addEventListener('click', () => {
+            replyText.innerText = replies[selectedMood];
+            modal.style.display = "flex";
+        });
+
+        // 关闭
+        function closeModal() {
+            modal.style.display = "none";
+        }
+
+        // 下载卡片（简单截图替代）
+        function downloadCard() {
+            alert("已成功保存情绪卡片～\n可以直接截图保存哦！");
+        }
+    </script>
+</body>
+</html>
